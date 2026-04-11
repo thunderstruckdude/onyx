@@ -13,9 +13,10 @@ const bidsRouter = Router()
 
 const bidRateLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 20,
+  max: 12,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => `${req.ip}:${req.auth?.userId || 'anon'}`,
   message: {
     error: {
       message: 'Too many bid attempts. Slow down.'
@@ -26,8 +27,8 @@ const bidRateLimiter = rateLimit({
 
 bidsRouter.post(
   '/auctions/:auctionId',
-  bidRateLimiter,
   requireAuth,
+  bidRateLimiter,
   validate(placeBidSchema),
   asyncHandler(placeBidWithSocketController)
 )

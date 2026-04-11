@@ -10,6 +10,7 @@ const { v1Router } = require('./api/v1')
 const { notFoundMiddleware } = require('./middlewares/not-found.middleware')
 const { errorMiddleware } = require('./middlewares/error.middleware')
 const { env } = require('./config/env')
+const { requestContextMiddleware } = require('./utils/request-context')
 
 const app = express()
 
@@ -25,8 +26,10 @@ app.use(
 )
 app.use(compression())
 app.use(cookieParser())
+app.use('/api/v1/payments/webhooks', express.raw({ type: '*/*', limit: '256kb' }))
 app.use(express.json({ limit: '32kb' }))
 app.use(express.urlencoded({ extended: false }))
+app.use(requestContextMiddleware)
 app.use(mongoSanitize())
 app.use(hpp())
 app.use(morgan('combined'))

@@ -3,55 +3,58 @@ const mongoose = require('mongoose')
 const { Auction, AUCTION_STATUS } = require('../modules/auctions/models/auction.model')
 const { Bid } = require('../modules/bids/models/bid.model')
 const { createPaymentIntentForAuctionWin } = require('../services/payments.service')
+const { runTransactionWithRetry } = require('../utils/transaction')
 
 async function finalizeOneAuction (auctionId) {
-  const session = await mongoose.startSession()
   let winnerBidId = null
   let endedAuctionId = null
-  try {
-    await session.startTransaction()
+  await runTransactionWithRetry(async () => {
+    const session = await mongoose.startSession()
+    try {
+      await session.startTransaction()
 
-    const auction = await Auction.findOne({
-      _id: auctionId,
-      status: AUCTION_STATUS.ACTIVE,
-      endTime: { $lte: new Date() }
-    }).session(session)
+      const auction = await Auction.findOne({
+        _id: auctionId,
+        status: AUCTION_STATUS.ACTIVE,
+        endTime: { $lte: new Date() }
+      }).session(session)
 
-    if (!auction) {
-      await session.abortTransaction()
-      return
-    }
+      if (!auction) {
+        await session.abortTransaction()
+        return
+      }
 
-    const winnerBid = await Bid.findOne({ auctionId: auction._id })
-      .sort({ bidAmount: -1, createdAt: 1 })
-      .session(session)
+      const winnerBid = await Bid.findOne({ auctionId: auction._id })
+        .sort({ bidAmount: -1, createdAt: 1 })
+        .session(session)
 
-    if (!winnerBid) {
+      if (!winnerBid) {
+        auction.status = AUCTION_STATUS.ENDED
+        auction.finalizedAt = new Date()
+        await auction.save({ session })
+        await session.commitTransaction()
+        return
+      }
+
       auction.status = AUCTION_STATUS.ENDED
+      auction.winnerBidId = winnerBid._id
       auction.finalizedAt = new Date()
+      auction.payment = {
+        provider: null,
+        paymentIntentId: null,
+        status: 'pending'
+      }
       await auction.save({ session })
       await session.commitTransaction()
-      return
+      winnerBidId = winnerBid._id
+      endedAuctionId = auction._id
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    } finally {
+      await session.endSession()
     }
-
-    auction.status = AUCTION_STATUS.ENDED
-    auction.winnerBidId = winnerBid._id
-    auction.finalizedAt = new Date()
-    auction.payment = {
-      provider: null,
-      paymentIntentId: null,
-      status: 'pending'
-    }
-    await auction.save({ session })
-    await session.commitTransaction()
-    winnerBidId = winnerBid._id
-    endedAuctionId = auction._id
-  } catch (error) {
-    await session.abortTransaction()
-    throw error
-  } finally {
-    await session.endSession()
-  }
+  })
 
   if (!winnerBidId || !endedAuctionId) {
     return

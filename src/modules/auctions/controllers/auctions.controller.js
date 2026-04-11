@@ -38,6 +38,23 @@ async function createAuctionController (req, res) {
   })
 }
 
+async function cancelAuctionController (req, res) {
+  const { auctionId } = req.params
+  const auction = await Auction.findById(auctionId)
+  if (!auction) {
+    throw new AppError(HTTP_STATUS.NOT_FOUND, 'Auction not found')
+  }
+  if (String(auction.sellerId) !== req.auth.userId && req.auth.role !== 'admin') {
+    throw new AppError(HTTP_STATUS.FORBIDDEN, 'Not allowed to cancel this auction')
+  }
+  if (![AUCTION_STATUS.DRAFT, AUCTION_STATUS.ACTIVE].includes(auction.status)) {
+    throw new AppError(HTTP_STATUS.CONFLICT, 'Auction cannot be cancelled in current state')
+  }
+  auction.status = AUCTION_STATUS.CANCELLED
+  await auction.save()
+  return res.status(HTTP_STATUS.OK).json({ data: { auction } })
+}
+
 async function listAuctionsController (req, res) {
   const {
     page,
@@ -93,6 +110,7 @@ async function getAuctionByIdController (req, res) {
 
 module.exports = {
   createAuctionController,
+  cancelAuctionController,
   listAuctionsController,
   getAuctionByIdController
 }

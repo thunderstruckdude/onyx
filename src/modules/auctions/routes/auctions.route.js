@@ -4,6 +4,7 @@ const { validate } = require('../../../middlewares/validate.middleware')
 const { requireAuth, requireRoles } = require('../../../middlewares/auth.middleware')
 const {
   createAuctionController,
+  cancelAuctionController,
   listAuctionsController,
   getAuctionByIdController
 } = require('../controllers/auctions.controller')
@@ -21,6 +22,12 @@ auctionsRouter.post(
   requireRoles('seller', 'admin'),
   validate(createAuctionSchema),
   asyncHandler(createAuctionController)
+)
+auctionsRouter.patch(
+  '/:auctionId/cancel',
+  requireAuth,
+  validate(auctionIdSchema),
+  asyncHandler(cancelAuctionController)
 )
 
 module.exports = { auctionsRouter }

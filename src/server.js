@@ -2,6 +2,7 @@ const http = require('http')
 const { app } = require('./app')
 const { env } = require('./config/env')
 const { connectDatabase } = require('./db/connect')
+const { assertReplicaSetReady } = require('./db/health')
 const { initSocket } = require('./realtime/socket')
 const { startAuctionFinalizerWorker } = require('./workers/finalize-auctions.worker')
 
@@ -10,6 +11,7 @@ initSocket(server)
 
 async function bootstrap () {
   await connectDatabase(env.mongoUri)
+  await assertReplicaSetReady()
   startAuctionFinalizerWorker()
 
   server.listen(env.port, () => {

@@ -10,6 +10,13 @@ const AUCTION_STATUS = Object.freeze({
   CANCELLED: 'cancelled'
 })
 
+const PAYMENT_STATUS = Object.freeze({
+  PENDING: 'pending',
+  REQUIRES_ACTION: 'requires_action',
+  PAID: 'paid',
+  FAILED: 'failed'
+})
+
 const auctionSchema = new Schema(
   {
     sellerId: {
@@ -102,7 +109,7 @@ const auctionSchema = new Schema(
       },
       status: {
         type: String,
-        enum: ['pending', 'requires_action', 'paid', 'failed', null],
+        enum: [...Object.values(PAYMENT_STATUS), null],
         default: null
       },
       paymentIntentId: {
@@ -135,5 +142,6 @@ auctionSchema.index({ currentBid: -1, endTime: 1 })
 
 module.exports = {
   Auction: mongoose.model('Auction', auctionSchema),
-  AUCTION_STATUS
+  AUCTION_STATUS,
+  PAYMENT_STATUS
 }

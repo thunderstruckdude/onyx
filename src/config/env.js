@@ -21,8 +21,10 @@ const env = {
   cookieDomain: process.env.COOKIE_DOMAIN || undefined,
   corsOrigin: process.env.CORS_ORIGIN || '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
-  razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || ''
+  razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
+  razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || ''
 }
 
 module.exports = { env }
