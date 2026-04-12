@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { formatCurrency, formatTimeLeft } from '../lib/format'
 
 export function AuctionCard({ auction, selected, onSelect }) {
-  const ended = new Date(auction.endTime).getTime() <= Date.now()
+  const ended = auction.status !== 'active'
 
   return (
     <motion.button
