@@ -2,12 +2,10 @@ const cron = require('node-cron')
 const mongoose = require('mongoose')
 const { Auction, AUCTION_STATUS } = require('../modules/auctions/models/auction.model')
 const { Bid } = require('../modules/bids/models/bid.model')
-const { createPaymentIntentForAuctionWin } = require('../services/payments.service')
+const { User } = require('../modules/users/models/user.model')
 const { runTransactionWithRetry } = require('../utils/transaction')
 
 async function finalizeOneAuction (auctionId) {
-  let winnerBidId = null
-  let endedAuctionId = null
   await runTransactionWithRetry(async () => {
     const session = await mongoose.startSession()
     try {
@@ -31,23 +29,49 @@ async function finalizeOneAuction (auctionId) {
       if (!winnerBid) {
         auction.status = AUCTION_STATUS.ENDED
         auction.finalizedAt = new Date()
+        auction.payment = {
+          provider: 'onyx_credits',
+          paymentIntentId: null,
+          status: 'pending'
+        }
         await auction.save({ session })
         await session.commitTransaction()
         return
       }
 
-      auction.status = AUCTION_STATUS.ENDED
+      const [seller, winner] = await Promise.all([
+        User.findById(auction.sellerId).session(session),
+        User.findById(winnerBid.bidderId).session(session)
+      ])
+
+      if (!seller || !winner || !winner.isActive || winner.onyxCredits < winnerBid.bidAmount) {
+        auction.status = AUCTION_STATUS.ENDED
+        auction.winnerBidId = winnerBid._id
+        auction.finalizedAt = new Date()
+        auction.payment = {
+          provider: 'onyx_credits',
+          paymentIntentId: null,
+          status: 'failed'
+        }
+        await auction.save({ session })
+        await session.commitTransaction()
+        return
+      }
+
+      winner.onyxCredits -= winnerBid.bidAmount
+      seller.onyxCredits += winnerBid.bidAmount
+      await Promise.all([winner.save({ session }), seller.save({ session })])
+
+      auction.status = AUCTION_STATUS.SETTLED
       auction.winnerBidId = winnerBid._id
       auction.finalizedAt = new Date()
       auction.payment = {
-        provider: null,
+        provider: 'onyx_credits',
         paymentIntentId: null,
-        status: 'pending'
+        status: 'paid'
       }
       await auction.save({ session })
       await session.commitTransaction()
-      winnerBidId = winnerBid._id
-      endedAuctionId = auction._id
     } catch (error) {
       await session.abortTransaction()
       throw error
@@ -55,39 +79,6 @@ async function finalizeOneAuction (auctionId) {
       await session.endSession()
     }
   })
-
-  if (!winnerBidId || !endedAuctionId) {
-    return
-  }
-
-  const [auction, winnerBid] = await Promise.all([
-    Auction.findById(endedAuctionId),
-    Bid.findById(winnerBidId)
-  ])
-  if (!auction || !winnerBid) {
-    return
-  }
-
-  const paymentIntent = await createPaymentIntentForAuctionWin({
-    auction,
-    winnerBid
-  })
-
-  await Auction.findOneAndUpdate(
-    {
-      _id: endedAuctionId,
-      status: AUCTION_STATUS.ENDED
-    },
-    {
-      $set: {
-        payment: {
-          provider: paymentIntent.provider,
-          paymentIntentId: paymentIntent.paymentIntentId,
-          status: paymentIntent.status
-        }
-      }
-    }
-  )
 }
 
 async function finalizeExpiredAuctionsSweep () {

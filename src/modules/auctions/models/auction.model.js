@@ -104,7 +104,7 @@ const auctionSchema = new Schema(
     payment: {
       provider: {
         type: String,
-        enum: ['stripe', 'razorpay', null],
+        enum: ['stripe', 'razorpay', 'onyx_credits', null],
         default: null
       },
       status: {

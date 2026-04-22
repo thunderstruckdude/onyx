@@ -1,4 +1,5 @@
 const { Auction, AUCTION_STATUS } = require('../models/auction.model')
+const { Bid } = require('../../bids/models/bid.model')
 const { HTTP_STATUS } = require('../../../constants/http-status')
 const { AppError } = require('../../../utils/app-error')
 
@@ -108,9 +109,64 @@ async function getAuctionByIdController (req, res) {
   return res.status(HTTP_STATUS.OK).json({ data: { auction } })
 }
 
+async function getAuctionAnalyticsController (req, res) {
+  const { auctionId } = req.params
+  const auction = await Auction.findById(auctionId).lean()
+  if (!auction) {
+    throw new AppError(HTTP_STATUS.NOT_FOUND, 'Auction not found')
+  }
+
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000)
+  const [summaryRows, uniqueBidderRows, recentBids, recentBidCount] = await Promise.all([
+    Bid.aggregate([
+      { $match: { auctionId: auction._id } },
+      {
+        $group: {
+          _id: null,
+          totalBids: { $sum: 1 },
+          averageBidAmount: { $avg: '$bidAmount' },
+          highestBidAmount: { $max: '$bidAmount' },
+          lowestBidAmount: { $min: '$bidAmount' }
+        }
+      }
+    ]),
+    Bid.aggregate([
+      { $match: { auctionId: auction._id } },
+      { $group: { _id: '$bidderId' } },
+      { $count: 'count' }
+    ]),
+    Bid.find({ auctionId: auction._id }).sort({ createdAt: -1 }).limit(25).lean(),
+    Bid.countDocuments({ auctionId: auction._id, createdAt: { $gte: tenMinutesAgo } })
+  ])
+
+  const summary = summaryRows[0] || {
+    totalBids: 0,
+    averageBidAmount: 0,
+    highestBidAmount: auction.currentBid,
+    lowestBidAmount: auction.basePrice
+  }
+  const uniqueBidders = uniqueBidderRows[0]?.count || 0
+
+  return res.status(HTTP_STATUS.OK).json({
+    data: {
+      auction,
+      stats: {
+        totalBids: summary.totalBids,
+        uniqueBidders,
+        averageBidAmount: Number(summary.averageBidAmount || 0),
+        highestBidAmount: Number(summary.highestBidAmount || auction.currentBid),
+        lowestBidAmount: Number(summary.lowestBidAmount || auction.basePrice),
+        bidVelocityLast10m: recentBidCount
+      },
+      recentBids
+    }
+  })
+}
+
 module.exports = {
   createAuctionController,
   cancelAuctionController,
   listAuctionsController,
-  getAuctionByIdController
+  getAuctionByIdController,
+  getAuctionAnalyticsController
 }

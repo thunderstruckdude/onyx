@@ -10,16 +10,16 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-500/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200"
         >
-          Next-Gen Auction Infrastructure
+          ONYX // AUCTION GRID
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="text-4xl font-semibold leading-tight text-white sm:text-5xl"
+          className="font-display text-4xl font-semibold leading-tight text-white sm:text-5xl"
         >
-          Where premium lots meet
-          <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-emerald-200 bg-clip-text text-transparent"> realtime competitive intelligence.</span>
+          Trade in the neon underground
+          <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent"> with deterministic realtime execution.</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 16 }}
@@ -27,7 +27,7 @@ export function HeroSection() {
           transition={{ delay: 0.1 }}
           className="max-w-2xl text-base text-slate-300"
         >
-          AetherBid delivers transaction-safe live auctions with immersive visual experience, tamper-resistant bidding flows, and secure payment settlement.
+          Onyx is a dark-market auction platform for futuristic gear, powered by transaction-safe bidding and native Onyx credit settlement.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -35,8 +35,8 @@ export function HeroSection() {
           transition={{ delay: 0.15 }}
           className="flex flex-wrap gap-3"
         >
-          <Link to="/live" className="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950">
-            Enter Live Marketplace
+          <Link to="/marketplace" className="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950">
+            Enter Marketplace
           </Link>
           <Link to="/platform" className="rounded-xl border border-white/20 px-5 py-2.5 text-sm text-slate-200 hover:bg-white/10">
             Explore Platform
@@ -52,9 +52,9 @@ export function HeroSection() {
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <Card title="Live Bid Pulse" value="127 bids / 10s" accent="text-emerald-200" />
-          <Card title="Current Prime Lot" value="$42,800" accent="text-cyan-200" />
+          <Card title="Current Prime Lot" value="42,800 ONX" accent="text-cyan-200" />
           <Card title="Concurrent Users" value="18,204" accent="text-indigo-200" />
-          <Card title="Trust Score" value="99.9%" accent="text-rose-200" />
+          <Card title="Settlement Integrity" value="99.9%" accent="text-fuchsia-200" />
         </div>
       </motion.div>
     </section>

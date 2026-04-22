@@ -22,7 +22,8 @@ async function registerController (req, res) {
   const user = new User({
     email: normalizedEmail,
     fullName,
-    role
+    role,
+    onyxCredits: 50000
   })
   await user.setPassword(password)
   await user.save()
@@ -41,7 +42,8 @@ async function registerController (req, res) {
         id: String(user._id),
         email: user.email,
         fullName: user.fullName,
-        role: user.role
+        role: user.role,
+        onyxCredits: user.onyxCredits
       }
     }
   })
@@ -82,7 +84,8 @@ async function loginController (req, res) {
         id: String(user._id),
         email: user.email,
         fullName: user.fullName,
-        role: user.role
+        role: user.role,
+        onyxCredits: user.onyxCredits
       }
     }
   })

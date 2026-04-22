@@ -36,6 +36,12 @@ const userSchema = new Schema(
       default: USER_ROLES.BUYER,
       required: true
     },
+    onyxCredits: {
+      type: Number,
+      required: true,
+      default: 50000,
+      min: 0
+    },
     isEmailVerified: {
       type: Boolean,
       default: false
@@ -73,6 +79,7 @@ const userSchema = new Schema(
 
 userSchema.index({ email: 1 }, { unique: true })
 userSchema.index({ role: 1, isActive: 1 })
+userSchema.index({ onyxCredits: -1 })
 
 userSchema.methods.setPassword = async function setPassword (plainPassword) {
   const saltRounds = 12

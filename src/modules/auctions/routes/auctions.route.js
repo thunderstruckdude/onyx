@@ -6,7 +6,8 @@ const {
   createAuctionController,
   cancelAuctionController,
   listAuctionsController,
-  getAuctionByIdController
+  getAuctionByIdController,
+  getAuctionAnalyticsController
 } = require('../controllers/auctions.controller')
 const { createAuctionSchema } = require('../validators/create-auction.schema')
 const { listAuctionsSchema } = require('../validators/list-auctions.schema')
@@ -16,6 +17,11 @@ const auctionsRouter = Router()
 
 auctionsRouter.get('/', validate(listAuctionsSchema), asyncHandler(listAuctionsController))
 auctionsRouter.get('/:auctionId', validate(auctionIdSchema), asyncHandler(getAuctionByIdController))
+auctionsRouter.get(
+  '/:auctionId/analytics',
+  validate(auctionIdSchema),
+  asyncHandler(getAuctionAnalyticsController)
+)
 auctionsRouter.post(
   '/',
   requireAuth,

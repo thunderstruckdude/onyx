@@ -59,7 +59,8 @@ export function LiveAuctionBoard ({
         <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">Authenticated as</p>
-            <h1 className="text-lg font-semibold text-white">{user.fullName}</h1>
+            <h1 className="font-display text-lg font-semibold text-white">{user.fullName}</h1>
+            <p className="mt-1 text-xs text-cyan-200">{user.onyxCredits?.toLocaleString?.() || 0} ONX credits</p>
           </div>
           <button
             onClick={onLogout}
@@ -79,7 +80,7 @@ export function LiveAuctionBoard ({
               className="space-y-5"
             >
               <div>
-                <h2 className="text-2xl font-semibold text-white">{selectedAuction.title}</h2>
+                <h2 className="font-display text-2xl font-semibold text-white">{selectedAuction.title}</h2>
                 <p className="mt-2 max-w-3xl text-sm text-slate-300">{selectedAuction.description}</p>
               </div>
 

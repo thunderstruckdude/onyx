@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { apiRequest } from '../api/client'
 import { formatCurrency, formatTimeLeft } from '../lib/format'
 
@@ -26,10 +27,10 @@ export function MarketplacePage () {
   return (
     <div className="aurora-bg min-h-screen">
       <section className="mx-auto w-full max-w-7xl px-4 py-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">Marketplace</p>
-        <h1 className="mt-2 text-4xl font-semibold text-white">Active premium lots</h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">Onyx Marketplace</p>
+        <h1 className="mt-2 font-display text-4xl font-semibold text-white">Cyber-tech lots in active contention</h1>
         <p className="mt-3 max-w-3xl text-slate-300">
-          Explore live inventory, monitor closing windows, and jump into the live bidding floor when ready.
+          Explore weaponized wearables, neural hardware, and black-market intelligence devices currently running live.
         </p>
 
         {error ? <p className="mt-4 text-sm text-rose-300">{error}</p> : null}
@@ -46,8 +47,8 @@ export function MarketplacePage () {
             >
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-sm font-semibold text-white">{auction.title}</p>
-                <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] uppercase tracking-wider text-emerald-200">
-                  Live
+                <span className="rounded-full bg-indigo-500/20 px-2 py-1 text-[10px] uppercase tracking-wider text-indigo-200">
+                  Signal: Live
                 </span>
               </div>
               <p className="line-clamp-3 text-sm text-slate-300">{auction.description}</p>
@@ -61,6 +62,12 @@ export function MarketplacePage () {
                   <p className="font-semibold text-white">{formatTimeLeft(auction.endTime)}</p>
                 </div>
               </div>
+              <Link
+                to={`/auctions/${auction._id}`}
+                className="mt-4 inline-flex rounded-lg border border-cyan-300/30 px-3 py-1.5 text-xs uppercase tracking-[0.15em] text-cyan-200 transition hover:bg-cyan-400/10"
+              >
+                Open Intel View
+              </Link>
             </motion.article>
           ))}
         </div>

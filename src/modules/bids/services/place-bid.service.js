@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const { Auction, AUCTION_STATUS } = require('../../auctions/models/auction.model')
 const { Bid } = require('../models/bid.model')
+const { User } = require('../../users/models/user.model')
 const { HTTP_STATUS } = require('../../../constants/http-status')
 const { AppError } = require('../../../utils/app-error')
 const { securityLog } = require('../../../utils/security-log')
@@ -38,6 +39,14 @@ async function placeBid ({ auctionId, bidderId, bidAmount, source = 'api' }) {
           HTTP_STATUS.BAD_REQUEST,
           `Bid must be >= ${minAllowedBid}`
         )
+      }
+
+      const bidder = await User.findById(bidderId).select('_id isActive onyxCredits').session(session)
+      if (!bidder || !bidder.isActive) {
+        throw new AppError(HTTP_STATUS.UNAUTHORIZED, 'Bidder is not authorized')
+      }
+      if (bidder.onyxCredits < bidAmount) {
+        throw new AppError(HTTP_STATUS.BAD_REQUEST, 'Insufficient Onyx credits for this bid')
       }
 
       const expectedVersion = auction.__v
