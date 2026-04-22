@@ -7,7 +7,7 @@ const {
   loginController,
   logoutController
 } = require('../controllers/auth.controller')
-const { getMeController } = require('../controllers/profile.controller')
+const { getMeController, getDashboardController } = require('../controllers/profile.controller')
 const { registerSchema } = require('../validators/register.schema')
 const { loginSchema } = require('../validators/login.schema')
 
@@ -17,5 +17,6 @@ usersRouter.post('/auth/register', validate(registerSchema), asyncHandler(regist
 usersRouter.post('/auth/login', validate(loginSchema), asyncHandler(loginController))
 usersRouter.post('/auth/logout', requireAuth, asyncHandler(logoutController))
 usersRouter.get('/me', requireAuth, asyncHandler(getMeController))
+usersRouter.get('/me/dashboard', requireAuth, asyncHandler(getDashboardController))
 
 module.exports = { usersRouter }

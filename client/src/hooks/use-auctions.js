@@ -82,6 +82,14 @@ export function useAuctions (enabled = true) {
       }
     })
 
+    socket.on('auction:finalized', (event) => {
+      setAuctions((prev) => prev.filter((item) => String(item._id) !== String(event.auctionId)))
+      if (String(selectedAuctionId) === String(event.auctionId)) {
+        setSelectedAuctionId(null)
+        setBidHistory([])
+      }
+    })
+
     return () => {
       auctions.forEach((a) => socket.emit('auction:leave', String(a._id)))
       socket.close()

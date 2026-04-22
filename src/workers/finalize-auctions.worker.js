@@ -3,11 +3,13 @@ const mongoose = require('mongoose')
 const { Auction, AUCTION_STATUS } = require('../modules/auctions/models/auction.model')
 const { Bid } = require('../modules/bids/models/bid.model')
 const { User } = require('../modules/users/models/user.model')
+const { getIo } = require('../realtime/socket')
 const { runTransactionWithRetry } = require('../utils/transaction')
 
 async function finalizeOneAuction (auctionId) {
-  await runTransactionWithRetry(async () => {
+  return runTransactionWithRetry(async () => {
     const session = await mongoose.startSession()
+    let finalizedEvent = null
     try {
       await session.startTransaction()
 
@@ -36,7 +38,13 @@ async function finalizeOneAuction (auctionId) {
         }
         await auction.save({ session })
         await session.commitTransaction()
-        return
+        finalizedEvent = {
+          auctionId: String(auction._id),
+          status: auction.status,
+          currentBid: auction.currentBid,
+          winnerBidderId: null
+        }
+        return finalizedEvent
       }
 
       const [seller, winner] = await Promise.all([
@@ -55,7 +63,13 @@ async function finalizeOneAuction (auctionId) {
         }
         await auction.save({ session })
         await session.commitTransaction()
-        return
+        finalizedEvent = {
+          auctionId: String(auction._id),
+          status: auction.status,
+          currentBid: auction.currentBid,
+          winnerBidderId: String(winnerBid.bidderId)
+        }
+        return finalizedEvent
       }
 
       winner.onyxCredits -= winnerBid.bidAmount
@@ -72,6 +86,13 @@ async function finalizeOneAuction (auctionId) {
       }
       await auction.save({ session })
       await session.commitTransaction()
+      finalizedEvent = {
+        auctionId: String(auction._id),
+        status: auction.status,
+        currentBid: auction.currentBid,
+        winnerBidderId: String(winnerBid.bidderId)
+      }
+      return finalizedEvent
     } catch (error) {
       await session.abortTransaction()
       throw error
@@ -79,6 +100,18 @@ async function finalizeOneAuction (auctionId) {
       await session.endSession()
     }
   })
+}
+
+async function activateScheduledAuctionsSweep () {
+  await Auction.updateMany(
+    {
+      status: AUCTION_STATUS.DRAFT,
+      startTime: { $lte: new Date() }
+    },
+    {
+      $set: { status: AUCTION_STATUS.ACTIVE }
+    }
+  )
 }
 
 async function finalizeExpiredAuctionsSweep () {
@@ -89,14 +122,19 @@ async function finalizeExpiredAuctionsSweep () {
     .select('_id')
     .lean()
 
+  const io = getIo()
   for (const auction of expiredActive) {
-    await finalizeOneAuction(auction._id)
+    const finalizedEvent = await finalizeOneAuction(auction._id)
+    if (io && finalizedEvent) {
+      io.emit('auction:finalized', finalizedEvent)
+    }
   }
 }
 
 function startAuctionFinalizerWorker () {
   cron.schedule('*/1 * * * *', async () => {
     try {
+      await activateScheduledAuctionsSweep()
       await finalizeExpiredAuctionsSweep()
     } catch (error) {
       console.error('Auction finalizer sweep failed:', error.message)

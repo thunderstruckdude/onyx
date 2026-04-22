@@ -39,6 +39,19 @@ const auctionSchema = new Schema(
       minlength: 10,
       maxlength: 5000
     },
+    imageUrl: {
+      type: String,
+      trim: true,
+      maxlength: 1024,
+      default: null
+    },
+    category: {
+      type: String,
+      trim: true,
+      minlength: 2,
+      maxlength: 80,
+      default: 'Cyber Gear'
+    },
     currency: {
       type: String,
       required: true,
@@ -139,6 +152,7 @@ auctionSchema.index({ status: 1, endTime: 1 })
 auctionSchema.index({ status: 1, startTime: 1 })
 auctionSchema.index({ sellerId: 1, status: 1, createdAt: -1 })
 auctionSchema.index({ currentBid: -1, endTime: 1 })
+auctionSchema.index({ category: 1, status: 1, createdAt: -1 })
 
 module.exports = {
   Auction: mongoose.model('Auction', auctionSchema),

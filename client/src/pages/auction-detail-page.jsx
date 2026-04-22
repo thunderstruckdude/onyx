@@ -50,6 +50,13 @@ export function AuctionDetailPage () {
         {payload ? (
           <div className="mt-4 grid gap-5 lg:grid-cols-[1.2fr,0.8fr]">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-3xl p-6">
+              {payload.auction.imageUrl ? (
+                <img
+                  src={payload.auction.imageUrl}
+                  alt={payload.auction.title}
+                  className="mb-5 h-64 w-full rounded-2xl object-cover"
+                />
+              ) : null}
               <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">{payload.auction.status}</p>
               <h1 className="mt-2 text-4xl font-semibold text-white">{payload.auction.title}</h1>
               <p className="mt-4 text-sm text-slate-300">{payload.auction.description}</p>

@@ -7,6 +7,8 @@ async function createAuctionController (req, res) {
   const {
     title,
     description,
+    imageUrl,
+    category,
     currency,
     basePrice,
     minBidIncrement,
@@ -26,6 +28,8 @@ async function createAuctionController (req, res) {
     sellerId: req.auth.userId,
     title,
     description,
+    imageUrl: imageUrl || null,
+    category: category || 'Cyber Gear',
     currency,
     basePrice,
     minBidIncrement,

@@ -7,6 +7,8 @@ const createAuctionSchema = z.object({
     .object({
       title: z.string().min(3).max(200),
       description: z.string().min(10).max(5000),
+      imageUrl: z.string().url().max(1024).optional(),
+      category: z.string().min(2).max(80).optional(),
       currency: z.string().length(3).transform((v) => v.toUpperCase()),
       basePrice: z.number().nonnegative(),
       minBidIncrement: z.number().positive(),
