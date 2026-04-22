@@ -29,6 +29,61 @@ body {
     #04030b;
 }
 
+.onyx-landing {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.28), transparent 42%),
+    radial-gradient(circle at 88% 18%, rgba(20, 184, 166, 0.18), transparent 36%),
+    radial-gradient(circle at 62% 80%, rgba(15, 118, 110, 0.22), transparent 44%),
+    linear-gradient(180deg, rgba(2, 6, 9, 0.35), rgba(4, 3, 11, 0.85)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 8px),
+    #04030b;
+}
+
+.onyx-panel {
+  background: linear-gradient(135deg, rgba(7, 20, 24, 0.92), rgba(5, 12, 16, 0.88));
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  box-shadow:
+    0 0 30px rgba(16, 185, 129, 0.18),
+    0 0 24px rgba(20, 184, 166, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.onyx-divider {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.7), rgba(20, 184, 166, 0.4));
+}
+
+.marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.marquee-track.reverse {
+  animation-direction: reverse;
+}
+
+.marquee-item {
+  min-width: 260px;
+  max-width: 260px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(3, 10, 14, 0.6);
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 .glass {
   background: linear-gradient(135deg, rgba(8, 22, 28, 0.88), rgba(4, 14, 22, 0.82));
   border: 1px solid rgba(20, 184, 166, 0.22);
