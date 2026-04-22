@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { apiRequest } from '../api/client'
 import { io } from 'socket.io-client'
 
-export function useAuctions () {
+export function useAuctions (enabled = true) {
   const [auctions, setAuctions] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(enabled)
   const [error, setError] = useState('')
   const [selectedAuctionId, setSelectedAuctionId] = useState(null)
   const [placingBid, setPlacingBid] = useState(false)
+  const [bidHistory, setBidHistory] = useState([])
+  const [bidsLoading, setBidsLoading] = useState(false)
 
   const selectedAuction = useMemo(
     () => auctions.find((a) => String(a._id) === String(selectedAuctionId)) || null,
@@ -15,6 +17,11 @@ export function useAuctions () {
   )
 
   const fetchAuctions = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false)
+      setError('')
+      return
+    }
     try {
       setError('')
       setLoading(true)
@@ -28,13 +35,15 @@ export function useAuctions () {
     } finally {
       setLoading(false)
     }
-  }, [selectedAuctionId])
+  }, [enabled, selectedAuctionId])
 
   useEffect(() => {
+    if (!enabled) return
     void fetchAuctions()
-  }, [fetchAuctions])
+  }, [enabled, fetchAuctions])
 
   useEffect(() => {
+    if (!enabled) return
     const socket = io('/', {
       withCredentials: true,
       transports: ['websocket', 'polling']
@@ -58,21 +67,64 @@ export function useAuctions () {
             : item
         )
       )
+
+      if (String(selectedAuctionId) === String(event.auctionId)) {
+        setBidHistory((prev) => [
+          {
+            _id: event.bid.id,
+            auctionId: event.auctionId,
+            bidderId: event.bid.bidderId,
+            bidAmount: event.bid.bidAmount,
+            createdAt: event.bid.createdAt
+          },
+          ...prev
+        ].slice(0, 50))
+      }
     })
 
     return () => {
       auctions.forEach((a) => socket.emit('auction:leave', String(a._id)))
       socket.close()
     }
-  }, [auctions])
+  }, [auctions, enabled, selectedAuctionId])
+
+  const fetchBidHistory = useCallback(async (auctionId) => {
+    if (!enabled) {
+      setBidHistory([])
+      setBidsLoading(false)
+      return
+    }
+    if (!auctionId) {
+      setBidHistory([])
+      return
+    }
+    setBidsLoading(true)
+    try {
+      const payload = await apiRequest(`/bids/auctions/${auctionId}?limit=30&page=1`)
+      setBidHistory(payload.data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBidsLoading(false)
+    }
+  }, [enabled])
+
+  useEffect(() => {
+    if (!enabled) return
+    void fetchBidHistory(selectedAuctionId)
+  }, [enabled, fetchBidHistory, selectedAuctionId])
 
   async function placeBid (auctionId, bidAmount) {
     setPlacingBid(true)
     try {
+      setError('')
       await apiRequest(`/bids/auctions/${auctionId}`, {
         method: 'POST',
         body: { bidAmount }
       })
+    } catch (err) {
+      setError(err.message)
+      throw err
     } finally {
       setPlacingBid(false)
     }
@@ -87,6 +139,8 @@ export function useAuctions () {
     setSelectedAuctionId,
     selectedAuction,
     placeBid,
-    placingBid
+    placingBid,
+    bidHistory,
+    bidsLoading
   }
 }

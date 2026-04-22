@@ -6,24 +6,36 @@ const { env } = require('../../../config/env')
 const { ACCESS_COOKIE_NAME } = require('../../../constants/auth')
 const { buildAccessCookieOptions } = require('../../../utils/cookies')
 
+function normalizeEmail (email) {
+  return String(email || '').trim().toLowerCase()
+}
+
 async function registerController (req, res) {
   const { email, password, fullName, role } = req.body
+  const normalizedEmail = normalizeEmail(email)
 
-  const existing = await User.findOne({ email })
+  const existing = await User.findOne({ email: normalizedEmail })
   if (existing) {
     throw new AppError(HTTP_STATUS.CONFLICT, 'Email already registered')
   }
 
   const user = new User({
-    email,
+    email: normalizedEmail,
     fullName,
     role
   })
   await user.setPassword(password)
   await user.save()
 
+  const token = signAccessToken({
+    userId: user._id,
+    role: user.role,
+    env
+  })
+  res.cookie(ACCESS_COOKIE_NAME, token, buildAccessCookieOptions(env))
+
   return res.status(HTTP_STATUS.CREATED).json({
-    message: 'User registered successfully',
+    message: 'User registered and authenticated successfully',
     data: {
       user: {
         id: String(user._id),
@@ -37,8 +49,9 @@ async function registerController (req, res) {
 
 async function loginController (req, res) {
   const { email, password } = req.body
+  const normalizedEmail = normalizeEmail(email)
 
-  const user = await User.findOne({ email }).select('+passwordHash')
+  const user = await User.findOne({ email: normalizedEmail }).select('+passwordHash')
   if (!user) {
     throw new AppError(HTTP_STATUS.UNAUTHORIZED, 'Invalid credentials')
   }

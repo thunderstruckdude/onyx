@@ -9,13 +9,17 @@ export function AuthPanel ({ onLogin, onRegister, error }) {
   const [loginValues, setLoginValues] = useState(initialLogin)
   const [registerValues, setRegisterValues] = useState(initialRegister)
   const [busy, setBusy] = useState(false)
+  const [notice, setNotice] = useState('')
 
   async function submitLogin (e) {
     e.preventDefault()
+    setNotice('')
     setBusy(true)
     try {
       await onLogin(loginValues)
       setLoginValues(initialLogin)
+    } catch {
+      // error is surfaced by auth hook state
     } finally {
       setBusy(false)
     }
@@ -23,11 +27,14 @@ export function AuthPanel ({ onLogin, onRegister, error }) {
 
   async function submitRegister (e) {
     e.preventDefault()
+    setNotice('')
     setBusy(true)
     try {
       await onRegister(registerValues)
-      setMode('login')
       setRegisterValues(initialRegister)
+      setNotice('Account created and signed in.')
+    } catch {
+      // error is surfaced by auth hook state
     } finally {
       setBusy(false)
     }
@@ -123,6 +130,7 @@ export function AuthPanel ({ onLogin, onRegister, error }) {
         </form>
       )}
 
+      {notice ? <p className="mt-3 text-xs text-emerald-300">{notice}</p> : null}
       {error ? <p className="mt-3 text-xs text-rose-300">{error}</p> : null}
     </motion.div>
   )

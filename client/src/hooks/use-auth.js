@@ -6,7 +6,7 @@ export function useAuth () {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  async function refresh() {
+  async function refresh () {
     try {
       setError('')
       const payload = await apiRequest('/users/me')
@@ -23,25 +23,41 @@ export function useAuth () {
   }, [])
 
   async function login (values) {
-    setError('')
-    const payload = await apiRequest('/users/auth/login', {
-      method: 'POST',
-      body: values
-    })
-    setUser(payload.data.user)
+    try {
+      setError('')
+      const payload = await apiRequest('/users/auth/login', {
+        method: 'POST',
+        body: values
+      })
+      setUser(payload.data.user)
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
   }
 
   async function register (values) {
-    setError('')
-    await apiRequest('/users/auth/register', {
-      method: 'POST',
-      body: values
-    })
+    try {
+      setError('')
+      const payload = await apiRequest('/users/auth/register', {
+        method: 'POST',
+        body: values
+      })
+      setUser(payload.data.user)
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
   }
 
   async function logout () {
-    await apiRequest('/users/auth/logout', { method: 'POST' })
-    setUser(null)
+    try {
+      await apiRequest('/users/auth/logout', { method: 'POST' })
+      setUser(null)
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
   }
 
   return {

@@ -3,7 +3,9 @@ import clsx from 'clsx'
 
 const navItems = [
   { to: '/', label: 'Home' },
+  { to: '/marketplace', label: 'Marketplace' },
   { to: '/platform', label: 'Platform' },
+  { to: '/seller-studio', label: 'Seller Studio' },
   { to: '/live', label: 'Live Auction' }
 ]
 

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AuctionCard } from './auction-card'
+import { BidHistoryPanel } from './bid-history-panel'
 import { formatCurrency, formatTimeLeft } from '../lib/format'
 
 export function LiveAuctionBoard ({
@@ -10,6 +11,9 @@ export function LiveAuctionBoard ({
   setSelectedAuctionId,
   onPlaceBid,
   placingBid,
+  bidHistory,
+  bidsLoading,
+  error,
   user,
   onLogout
 }) {
@@ -107,6 +111,13 @@ export function LiveAuctionBoard ({
                   </motion.button>
                 </div>
               </form>
+
+              {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+              <BidHistoryPanel
+                bids={bidHistory}
+                loading={bidsLoading}
+                currency={selectedAuction.currency}
+              />
             </motion.div>
           ) : (
             <motion.div

@@ -4,11 +4,11 @@ import { AuthPanel } from '../components/auth-panel'
 import { LiveAuctionBoard } from '../components/live-auction-board'
 import { LoadingScreen } from '../components/loading-screen'
 
-export function LivePage() {
+export function LivePage () {
   const auth = useAuth()
-  const auctions = useAuctions()
+  const auctions = useAuctions(Boolean(auth.user))
   const bootLoading = auth.loading || auctions.loading
-  const mergedError = auth.error || auctions.error
+  const mergedError = auth.user ? auctions.error : auth.error
 
   return (
     <div className="aurora-bg min-h-screen">
@@ -21,6 +21,9 @@ export function LivePage() {
           setSelectedAuctionId={auctions.setSelectedAuctionId}
           onPlaceBid={auctions.placeBid}
           placingBid={auctions.placingBid}
+          bidHistory={auctions.bidHistory}
+          bidsLoading={auctions.bidsLoading}
+          error={mergedError}
           user={auth.user}
           onLogout={auth.logout}
         />

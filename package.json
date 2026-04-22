@@ -13,6 +13,7 @@
     "dev:client": "npm --prefix client run dev",
     "dev:api": "nodemon src/server.js",
     "dev:full": "concurrently -k -n API,WEB -c cyan,magenta \"npm run dev:api\" \"npm run dev:client\"",
+    "seed:demo": "node src/scripts/seed-demo-data.js",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down --remove-orphans",
     "docker:logs": "docker compose logs -f --tail=200",

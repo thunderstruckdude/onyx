@@ -4,9 +4,11 @@ const { asyncHandler } = require('../../../utils/async-handler')
 const { validate } = require('../../../middlewares/validate.middleware')
 const { requireAuth } = require('../../../middlewares/auth.middleware')
 const { placeBidSchema } = require('../validators/place-bid.schema')
+const { listBidsSchema } = require('../validators/list-bids.schema')
 const {
   placeBidWithSocketController
 } = require('../controllers/place-bid-socket.controller')
+const { listBidsController } = require('../controllers/list-bids.controller')
 const { HTTP_STATUS } = require('../../../constants/http-status')
 
 const bidsRouter = Router()
@@ -31,6 +33,11 @@ bidsRouter.post(
   bidRateLimiter,
   validate(placeBidSchema),
   asyncHandler(placeBidWithSocketController)
+)
+bidsRouter.get(
+  '/auctions/:auctionId',
+  validate(listBidsSchema),
+  asyncHandler(listBidsController)
 )
 
 module.exports = { bidsRouter }
