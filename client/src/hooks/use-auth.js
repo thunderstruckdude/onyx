@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { apiRequest } from '../api/client'
 
+function notifyAuthChanged () {
+  window.dispatchEvent(new CustomEvent('auth:changed'))
+}
+
 function getReadableAuthError (err, fallback = 'Request failed') {
   if (Array.isArray(err?.details) && err.details.length > 0) {
     const first = err.details[0]
@@ -19,8 +23,10 @@ export function useAuth () {
       setError('')
       const payload = await apiRequest('/users/me')
       setUser(payload.data.user)
+      notifyAuthChanged()
     } catch {
       setUser(null)
+      notifyAuthChanged()
     } finally {
       setLoading(false)
     }
@@ -38,6 +44,7 @@ export function useAuth () {
         body: values
       })
       setUser(payload.data.user)
+      notifyAuthChanged()
     } catch (err) {
       setError(getReadableAuthError(err, 'Login failed'))
       throw err
@@ -52,6 +59,7 @@ export function useAuth () {
         body: values
       })
       setUser(payload.data.user)
+      notifyAuthChanged()
     } catch (err) {
       setError(getReadableAuthError(err, 'Registration failed'))
       throw err
@@ -62,6 +70,7 @@ export function useAuth () {
     try {
       await apiRequest('/users/auth/logout', { method: 'POST' })
       setUser(null)
+      notifyAuthChanged()
     } catch (err) {
       setError(getReadableAuthError(err, 'Logout failed'))
       throw err

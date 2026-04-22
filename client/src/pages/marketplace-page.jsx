@@ -5,12 +5,16 @@ import { io } from 'socket.io-client'
 import { apiRequest } from '../api/client'
 import { formatCurrency, formatTimeLeft } from '../lib/format'
 import { useSecondTick } from '../hooks/use-second-tick'
+import { AuctionImage } from '../components/auction-image'
 
 export function MarketplacePage () {
   const nowMs = useSecondTick(true)
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [user, setUser] = useState(null)
+  const [bidDraft, setBidDraft] = useState({})
+  const [placingFor, setPlacingFor] = useState('')
   const itemsRef = useRef([])
   const socketRef = useRef(null)
 
@@ -19,11 +23,23 @@ export function MarketplacePage () {
   }, [items])
 
   useEffect(() => {
+    async function loadMe () {
+      try {
+        const payload = await apiRequest('/users/me')
+        setUser(payload.data.user)
+      } catch {
+        setUser(null)
+      }
+    }
+    void loadMe()
+  }, [])
+
+  useEffect(() => {
     async function load () {
       try {
         setError('')
         setLoading(true)
-        const payload = await apiRequest('/auctions?status=active&sortBy=currentBid&sortOrder=desc&limit=24')
+        const payload = await apiRequest('/auctions?status=active&sortBy=createdAt&sortOrder=desc&limit=24')
         setItems(payload.data)
       } catch (err) {
         setError(err.message)
@@ -49,18 +65,16 @@ export function MarketplacePage () {
 
     socket.on('bid:placed', (event) => {
       setItems((prev) =>
-        prev
-          .map((item) =>
-            String(item._id) === String(event.auctionId)
-              ? {
-                  ...item,
-                  currentBid: event.auction.currentBid,
-                  currentBidderId: event.auction.currentBidderId,
-                  bidCount: event.auction.bidCount
-                }
-              : item
-          )
-          .sort((a, b) => b.currentBid - a.currentBid)
+        prev.map((item) =>
+          String(item._id) === String(event.auctionId)
+            ? {
+                ...item,
+                currentBid: event.auction.currentBid,
+                currentBidderId: event.auction.currentBidderId,
+                bidCount: event.auction.bidCount
+              }
+            : item
+        )
       )
     })
 
@@ -78,6 +92,33 @@ export function MarketplacePage () {
     if (!socketRef.current) return
     items.forEach((auction) => socketRef.current.emit('auction:join', String(auction._id)))
   }, [items])
+
+  async function placeBid (auction) {
+    if (!user) {
+      setError('Sign in as buyer to place bids from marketplace.')
+      return
+    }
+    const minBid = auction.currentBid + auction.minBidIncrement
+    const bidAmount = Number(bidDraft[auction._id] || minBid)
+    if (Number.isNaN(bidAmount) || bidAmount < minBid) {
+      setError(`Bid must be at least ${minBid}`)
+      return
+    }
+
+    setPlacingFor(String(auction._id))
+    setError('')
+    try {
+      await apiRequest(`/bids/auctions/${auction._id}`, {
+        method: 'POST',
+        body: { bidAmount }
+      })
+      setBidDraft((prev) => ({ ...prev, [auction._id]: '' }))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setPlacingFor('')
+    }
+  }
 
   return (
     <div className="aurora-bg min-h-screen">
@@ -113,12 +154,7 @@ export function MarketplacePage () {
               className="glass overflow-hidden rounded-2xl"
             >
               <div className="relative h-44 w-full">
-                <img
-                  src={auction.imageUrl || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80'}
-                  alt={auction.title}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
+                <AuctionImage src={auction.imageUrl} alt={auction.title} className="h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
                 <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
                   <span className="rounded-full bg-cyan-500/20 px-2 py-1 text-[10px] uppercase tracking-wider text-cyan-100">
@@ -151,6 +187,25 @@ export function MarketplacePage () {
                 >
                   Open Intel View
                 </Link>
+                <div className="mt-3 flex gap-2">
+                  <input
+                    type="number"
+                    min={auction.currentBid + auction.minBidIncrement}
+                    step="0.01"
+                    value={bidDraft[auction._id] ?? ''}
+                    onChange={(e) => setBidDraft((prev) => ({ ...prev, [auction._id]: e.target.value }))}
+                    placeholder={`Min ${auction.currentBid + auction.minBidIncrement}`}
+                    className="w-full rounded-lg border border-white/20 bg-black/25 px-2 py-1.5 text-xs text-white outline-none"
+                  />
+                  <button
+                    onClick={() => placeBid(auction)}
+                    disabled={placingFor === String(auction._id) || !user || user.role === 'seller'}
+                    className="rounded-lg bg-emerald-400 px-3 py-1.5 text-xs font-semibold text-slate-950 disabled:opacity-50"
+                  >
+                    {placingFor === String(auction._id) ? 'Bidding...' : 'Bid'}
+                  </button>
+                </div>
+                {!user ? <p className="mt-1 text-[11px] text-slate-400">Sign in to bid instantly.</p> : null}
               </div>
             </motion.article>
           ))}

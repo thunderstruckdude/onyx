@@ -55,6 +55,12 @@ async function getDashboardController (req, res) {
     Bid.distinct('auctionId', { bidderId: userId })
   ])
 
+  const placedBidsRaw = await Bid.find({ bidderId: userId })
+    .sort({ createdAt: -1 })
+    .limit(30)
+    .populate('auctionId', 'title imageUrl status endTime')
+    .lean()
+
   const activeBidAuctions = distinctAuctionIds.length > 0
     ? await Auction.find({
       _id: { $in: distinctAuctionIds },
@@ -86,9 +92,60 @@ async function getDashboardController (req, res) {
       },
       wonAuctions,
       sellerAuctions,
-      activeBidAuctions
+      activeBidAuctions,
+      placedBids: placedBidsRaw.map((bid) => ({
+        id: String(bid._id),
+        bidAmount: bid.bidAmount,
+        currency: bid.currency,
+        createdAt: bid.createdAt,
+        auctionId: bid.auctionId?._id ? String(bid.auctionId._id) : String(bid.auctionId),
+        auctionTitle: bid.auctionId?.title || 'Unknown auction',
+        auctionImageUrl: bid.auctionId?.imageUrl || null,
+        auctionStatus: bid.auctionId?.status || null,
+        auctionEndTime: bid.auctionId?.endTime || null
+      }))
     }
   })
 }
 
-module.exports = { getMeController, getDashboardController }
+async function updateMeController (req, res) {
+  const user = await User.findById(req.auth.userId)
+  if (!user) {
+    throw new AppError(HTTP_STATUS.NOT_FOUND, 'User not found')
+  }
+
+  const { fullName, profile } = req.body
+  if (typeof fullName === 'string') {
+    user.fullName = fullName
+  }
+  if (profile && typeof profile === 'object') {
+    if (Object.prototype.hasOwnProperty.call(profile, 'avatarUrl')) {
+      user.profile.avatarUrl = profile.avatarUrl
+    }
+    if (Object.prototype.hasOwnProperty.call(profile, 'phone')) {
+      user.profile.phone = profile.phone
+    }
+  }
+
+  await user.save()
+
+  return res.status(HTTP_STATUS.OK).json({
+    message: 'Profile updated',
+    data: {
+      user: {
+        id: String(user._id),
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        onyxCredits: user.onyxCredits,
+        isEmailVerified: user.isEmailVerified,
+        isActive: user.isActive,
+        profile: user.profile,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
+    }
+  })
+}
+
+module.exports = { getMeController, getDashboardController, updateMeController }

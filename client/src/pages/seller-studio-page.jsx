@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { AuthPanel } from '../components/auth-panel'
 import { LoadingScreen } from '../components/loading-screen'
 import { apiRequest } from '../api/client'
@@ -112,6 +113,22 @@ export function SellerStudioPage () {
   return (
     <div className="aurora-bg min-h-screen">
       <section className="mx-auto w-full max-w-7xl px-4 py-10">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="text-xs text-slate-300">
+            Signed in as <span className="font-semibold text-white">{auth.user.email}</span> ({auth.user.role})
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/live" className="rounded-xl border border-cyan-300/30 px-3 py-2 text-xs text-cyan-200 hover:bg-cyan-400/10">
+              Open live floor
+            </Link>
+            <button
+              onClick={auth.logout}
+              className="rounded-xl border border-white/20 bg-black/20 px-3 py-2 text-xs text-slate-300 hover:bg-black/35"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
         <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">Seller Studio</p>
         <h1 className="mt-2 text-4xl font-semibold text-white">Create, launch, and monitor live auctions.</h1>
         <p className="mt-3 max-w-3xl text-slate-300">

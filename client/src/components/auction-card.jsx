@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { formatCurrency, formatTimeLeft } from '../lib/format'
+import { AuctionImage } from './auction-image'
 
 export function AuctionCard ({ auction, selected, onSelect, nowMs }) {
   const ended = auction.status !== 'active'
@@ -15,9 +16,7 @@ export function AuctionCard ({ auction, selected, onSelect, nowMs }) {
         selected ? 'neon-ring border-cyan-300/50' : 'border-white/10'
       )}
     >
-      {auction.imageUrl ? (
-        <img src={auction.imageUrl} alt={auction.title} className="mb-3 h-24 w-full rounded-xl object-cover" />
-      ) : null}
+      <AuctionImage src={auction.imageUrl} alt={auction.title} className="mb-3 h-24 w-full rounded-xl object-cover" />
       <div className="mb-2 flex items-start justify-between gap-3">
         <h3 className="line-clamp-1 text-sm font-semibold text-white">{auction.title}</h3>
         <span className={clsx(

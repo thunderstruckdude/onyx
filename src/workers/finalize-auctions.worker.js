@@ -132,7 +132,7 @@ async function finalizeExpiredAuctionsSweep () {
 }
 
 function startAuctionFinalizerWorker () {
-  cron.schedule('*/1 * * * *', async () => {
+  cron.schedule('*/10 * * * * *', async () => {
     try {
       await activateScheduledAuctionsSweep()
       await finalizeExpiredAuctionsSweep()

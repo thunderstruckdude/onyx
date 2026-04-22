@@ -23,7 +23,7 @@ async function registerController (req, res) {
     email: normalizedEmail,
     fullName,
     role,
-    onyxCredits: 50000
+    onyxCredits: role === 'seller' ? 75000 : 200000
   })
   await user.setPassword(password)
   await user.save()
