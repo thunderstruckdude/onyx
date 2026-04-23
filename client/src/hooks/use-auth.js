@@ -23,10 +23,8 @@ export function useAuth () {
       setError('')
       const payload = await apiRequest('/users/me')
       setUser(payload.data.user)
-      notifyAuthChanged()
     } catch {
       setUser(null)
-      notifyAuthChanged()
     } finally {
       setLoading(false)
     }

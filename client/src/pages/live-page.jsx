@@ -7,8 +7,16 @@ import { LoadingScreen } from '../components/loading-screen'
 export function LivePage () {
   const auth = useAuth()
   const auctions = useAuctions(Boolean(auth.user))
-  const bootLoading = auth.loading || auctions.loading
+  const bootLoading = auth.loading || (Boolean(auth.user) && auctions.loading)
   const mergedError = auth.user ? auctions.error : auth.error
+
+  if (auth.loading) {
+    return (
+      <div className="aurora-bg min-h-screen">
+        <LoadingScreen loading />
+      </div>
+    )
+  }
 
   return (
     <div className="aurora-bg min-h-screen">

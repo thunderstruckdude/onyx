@@ -7,6 +7,14 @@ import { useAuth } from '../hooks/use-auth'
 import { formatCurrency, formatTimeLeft } from '../lib/format'
 import { useSecondTick } from '../hooks/use-second-tick'
 
+function getReadableApiError (err, fallback = 'Request failed') {
+  if (Array.isArray(err?.details) && err.details.length > 0) {
+    const first = err.details[0]
+    if (first?.message) return first.message
+  }
+  return err?.message || fallback
+}
+
 export function SellerStudioPage () {
   const nowMs = useSecondTick(true)
   const auth = useAuth()
@@ -43,18 +51,50 @@ export function SellerStudioPage () {
     setBusy(true)
     setError('')
     try {
+      const trimmedTitle = values.title.trim()
+      const trimmedDescription = values.description.trim()
+      const trimmedCategory = values.category.trim()
+      const durationMinutes = Number(values.durationMinutes)
+      const basePrice = Number(values.basePrice)
+      const minBidIncrement = Number(values.minBidIncrement)
+
+      if (trimmedTitle.length < 3) {
+        setError('Title must be at least 3 characters')
+        return
+      }
+      if (trimmedDescription.length < 10) {
+        setError('Description must be at least 10 characters')
+        return
+      }
+      if (trimmedCategory.length < 2) {
+        setError('Category must be at least 2 characters')
+        return
+      }
+      if (!Number.isFinite(durationMinutes) || durationMinutes < 1) {
+        setError('Duration must be at least 1 minute')
+        return
+      }
+      if (!Number.isFinite(basePrice) || basePrice < 0) {
+        setError('Base price must be a valid non-negative number')
+        return
+      }
+      if (!Number.isFinite(minBidIncrement) || minBidIncrement <= 0) {
+        setError('Min increment must be greater than 0')
+        return
+      }
+
       const start = new Date()
-      const end = new Date(start.getTime() + Number(values.durationMinutes) * 60 * 1000)
+      const end = new Date(start.getTime() + durationMinutes * 60 * 1000)
       await apiRequest('/auctions', {
         method: 'POST',
         body: {
-          title: values.title,
-          description: values.description,
-          imageUrl: values.imageUrl || undefined,
-          category: values.category,
+          title: trimmedTitle,
+          description: trimmedDescription,
+          imageUrl: values.imageUrl.trim() || undefined,
+          category: trimmedCategory,
           currency: 'ONX',
-          basePrice: Number(values.basePrice),
-          minBidIncrement: Number(values.minBidIncrement),
+          basePrice,
+          minBidIncrement,
           startTime: start.toISOString(),
           endTime: end.toISOString()
         }
@@ -67,7 +107,7 @@ export function SellerStudioPage () {
       }))
       await loadMyAuctions()
     } catch (err) {
-      setError(err.message)
+      setError(getReadableApiError(err, 'Failed to publish auction'))
     } finally {
       setBusy(false)
     }
@@ -138,6 +178,7 @@ export function SellerStudioPage () {
               onChange={(e) => setValues((v) => ({ ...v, title: e.target.value }))}
               className="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-white outline-none"
               placeholder="Lot title"
+              minLength={3}
               required
             />
             <textarea
@@ -145,13 +186,14 @@ export function SellerStudioPage () {
               onChange={(e) => setValues((v) => ({ ...v, description: e.target.value }))}
               className="h-28 w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-white outline-none"
               placeholder="Describe the item"
+              minLength={10}
               required
             />
             <input
               value={values.imageUrl}
               onChange={(e) => setValues((v) => ({ ...v, imageUrl: e.target.value }))}
               className="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-white outline-none"
-              placeholder="Image URL (https://...)"
+              placeholder="Image URL (optional, https://...)"
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <input
@@ -159,6 +201,7 @@ export function SellerStudioPage () {
                 onChange={(e) => setValues((v) => ({ ...v, category: e.target.value }))}
                 className="w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-white outline-none"
                 placeholder="Category"
+                minLength={2}
                 required
               />
               <input
