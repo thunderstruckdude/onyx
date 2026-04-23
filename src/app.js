@@ -26,7 +26,6 @@ app.use(
 )
 app.use(compression())
 app.use(cookieParser())
-app.use('/api/v1/payments/webhooks', express.raw({ type: '*/*', limit: '256kb' }))
 app.use(express.json({ limit: '32kb' }))
 app.use(express.urlencoded({ extended: false }))
 app.use(requestContextMiddleware)
