@@ -64,6 +64,15 @@ This repository contains a full-stack auction platform designed around a modular
 
 ### Install on a local machine
 
+Clone the repository and enter it:
+
+```bash
+git clone <repo-url>
+cd auction
+```
+
+Install dependencies for both the backend and client:
+
 ```bash
 npm install
 npm --prefix client install
@@ -86,6 +95,20 @@ If you are using Docker, the MongoDB URI can point at the replica-set container 
 
 ```bash
 npm run docker:up
+```
+
+That brings up MongoDB, the API, and the web client. Open `http://localhost:5173` after the containers are healthy.
+
+If you want demo data, seed it after the stack is up:
+
+```bash
+npm run seed:demo
+```
+
+For a heavier marketplace demo:
+
+```bash
+npm run seed:flood
 ```
 
 ### Start the app without Docker
@@ -126,18 +149,7 @@ Required:
 - `MONGODB_URI`
 - `JWT_ACCESS_SECRET`
 
-Common optional values:
 
-- `PORT`
-- `JWT_ACCESS_TTL`
-- `JWT_ISSUER`
-- `CORS_ORIGIN`
-- `COOKIE_DOMAIN`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
-- `RAZORPAY_WEBHOOK_SECRET`
 
 ## Scripts
 

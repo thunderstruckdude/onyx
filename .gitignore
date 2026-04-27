@@ -20,3 +20,4 @@ build/
 .vscode/
 
 mongo_data/
+TECHNICAL-README.md
