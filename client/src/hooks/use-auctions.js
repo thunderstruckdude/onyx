@@ -11,6 +11,17 @@ export function useAuctions (enabled = true) {
   const [bidHistory, setBidHistory] = useState([])
   const [bidsLoading, setBidsLoading] = useState(false)
 
+  function sortAuctions (items) {
+    return [...items].sort((a, b) => new Date(a.endTime).getTime() - new Date(b.endTime).getTime())
+  }
+
+  function normalizeAuction (auction) {
+    return {
+      ...auction,
+      _id: String(auction._id || auction.id)
+    }
+  }
+
   const selectedAuction = useMemo(
     () => auctions.find((a) => String(a._id) === String(selectedAuctionId)) || null,
     [auctions, selectedAuctionId]
@@ -26,7 +37,7 @@ export function useAuctions (enabled = true) {
       setError('')
       setLoading(true)
       const payload = await apiRequest('/auctions?status=active&sortBy=endTime&sortOrder=asc&limit=50')
-      setAuctions(payload.data)
+      setAuctions(sortAuctions(payload.data.map(normalizeAuction)))
       if (!selectedAuctionId && payload.data.length > 0) {
         setSelectedAuctionId(String(payload.data[0]._id))
       }
@@ -55,7 +66,7 @@ export function useAuctions (enabled = true) {
 
     socket.on('bid:placed', (event) => {
       setAuctions((prev) =>
-        prev.map((item) =>
+        sortAuctions(prev.map((item) =>
           String(item._id) === String(event.auctionId)
             ? {
                 ...item,
@@ -65,7 +76,7 @@ export function useAuctions (enabled = true) {
                 __v: event.auction.version
               }
             : item
-        )
+        ))
       )
 
       if (String(selectedAuctionId) === String(event.auctionId)) {
@@ -79,6 +90,27 @@ export function useAuctions (enabled = true) {
           },
           ...prev
         ].slice(0, 50))
+      }
+    })
+
+    socket.on('auction:started', (event) => {
+      const startedAuction = normalizeAuction(event.auction)
+      setAuctions((prev) => {
+        if (prev.some((item) => String(item._id) === String(startedAuction._id))) {
+          return sortAuctions(prev.map((item) =>
+            String(item._id) === String(startedAuction._id)
+              ? startedAuction
+              : item
+          ))
+        }
+
+        return sortAuctions([startedAuction, ...prev])
+      })
+
+      socket.emit('auction:join', String(startedAuction._id))
+
+      if (!selectedAuctionId) {
+        setSelectedAuctionId(String(startedAuction._id))
       }
     })
 
