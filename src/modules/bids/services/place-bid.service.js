@@ -12,6 +12,8 @@ async function placeBid ({ auctionId, bidderId, bidAmount, source = 'api' }) {
     const session = await mongoose.startSession()
     let committedBid = null
     let updatedAuction = null
+    let previousHighBidderId = null
+    let previousHighBidAmount = null
     try {
       await session.startTransaction()
 
@@ -49,6 +51,8 @@ async function placeBid ({ auctionId, bidderId, bidAmount, source = 'api' }) {
         throw new AppError(HTTP_STATUS.BAD_REQUEST, 'Insufficient Onyx credits for this bid')
       }
 
+      previousHighBidderId = auction.currentBidderId ? String(auction.currentBidderId) : null
+      previousHighBidAmount = auction.currentBid
       const expectedVersion = auction.__v
       const auctionUpdate = await Auction.findOneAndUpdate(
         {
@@ -109,7 +113,9 @@ async function placeBid ({ auctionId, bidderId, bidAmount, source = 'api' }) {
 
     return {
       bid: committedBid,
-      auction: updatedAuction
+      auction: updatedAuction,
+      previousHighBidderId,
+      previousHighBidAmount
     }
   })
 }

@@ -103,15 +103,46 @@ async function finalizeOneAuction (auctionId) {
 }
 
 async function activateScheduledAuctionsSweep () {
-  await Auction.updateMany(
-    {
-      status: AUCTION_STATUS.DRAFT,
-      startTime: { $lte: new Date() }
-    },
-    {
-      $set: { status: AUCTION_STATUS.ACTIVE }
+  const io = getIo()
+  const readyToStart = await Auction.find({
+    status: AUCTION_STATUS.DRAFT,
+    startTime: { $lte: new Date() }
+  })
+
+  const startedEvents = []
+  for (const auction of readyToStart) {
+    auction.status = AUCTION_STATUS.ACTIVE
+    await auction.save()
+    const event = {
+      auctionId: String(auction._id),
+      auction: {
+        _id: String(auction._id),
+        id: String(auction._id),
+        sellerId: String(auction.sellerId),
+        title: auction.title,
+        description: auction.description,
+        imageUrl: auction.imageUrl,
+        category: auction.category,
+        currency: auction.currency,
+        basePrice: auction.basePrice,
+        currentBid: auction.currentBid,
+        currentBidderId: auction.currentBidderId ? String(auction.currentBidderId) : null,
+        minBidIncrement: auction.minBidIncrement,
+        bidCount: auction.bidCount,
+        status: auction.status,
+        startTime: auction.startTime,
+        endTime: auction.endTime,
+        winnerBidId: auction.winnerBidId,
+        finalizedAt: auction.finalizedAt
+      }
     }
-  )
+    startedEvents.push(event)
+    if (io) {
+      io.emit('auction:started', event)
+    }
+  }
+
+  return startedEvents
 }
 
 async function finalizeExpiredAuctionsSweep () {

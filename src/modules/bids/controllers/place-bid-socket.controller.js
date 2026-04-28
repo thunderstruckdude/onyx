@@ -36,6 +36,29 @@ async function placeBidWithSocketController (req, res) {
     }
   })
 
+  if (result.previousHighBidderId && result.previousHighBidderId !== bidderId) {
+    io.to(`user:${result.previousHighBidderId}`).emit('bid:outbid', {
+      auctionId: String(result.auction._id),
+      auction: {
+        id: String(result.auction._id),
+        title: result.auction.title,
+        imageUrl: result.auction.imageUrl,
+        currency: result.auction.currency,
+        currentBid: result.auction.currentBid,
+        endTime: result.auction.endTime
+      },
+      outbidByUserId: bidderId,
+      previousHighBidAmount: result.previousHighBidAmount,
+      newBidAmount: result.bid.bidAmount,
+      bid: {
+        id: String(result.bid._id),
+        bidderId: String(result.bid.bidderId),
+        bidAmount: result.bid.bidAmount,
+        createdAt: result.bid.createdAt
+      }
+    })
+  }
+
   return res.status(HTTP_STATUS.CREATED).json({
     message: 'Bid placed successfully',
     data: {
