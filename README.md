@@ -195,3 +195,4 @@ npm --prefix client run build
    - reusable frontend pieces live under `client/src/components/`
 
 5. Keep route versioning under `/api/v1/` and add new routers there instead of placing feature routes in `server.js`.
+".
