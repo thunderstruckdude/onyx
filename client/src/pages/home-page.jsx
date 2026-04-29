@@ -1,23 +1,21 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-const proofPoints = [
-  { label: 'Live signal', value: 'Sub-second' },
-  { label: 'Closeout sweep', value: 'Every 10s' },
-  { label: 'Bid integrity', value: 'OCC + txns' }
-]
-
 const trustMarks = ['Seller tools', 'Live floor', 'Finished reports', 'Admin console', 'Profile', 'Settlement']
 
-const brandMarks = [
-  'NovaGrid',
-  'Aether Labs',
-  'SignalForge',
-  'Helix Capital',
-  'Blackline',
-  'Orchid Ops',
-  'Terminal West',
-  'Ghostframe'
+const snapshotLabels = [
+  'Live floor',
+  'Secure bids',
+  'Timed close',
+  'Seller tools',
+  'Reports',
+  'Admin'
+]
+
+const snapshotStats = [
+  { label: 'Active lots', value: '48' },
+  { label: 'Highest bid', value: '18.4k' },
+  { label: 'Closeout', value: 'Cron sweep' }
 ]
 
 const pillars = [
@@ -116,49 +114,74 @@ export function HomePage () {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
-            className="onyx-panel rounded-3xl p-6 text-left"
+            className="onyx-panel overflow-hidden rounded-3xl p-5 text-left sm:p-6"
           >
-            <div className="flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.18em] text-emerald-200">Launch snapshot</p>
-              <span className="rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-emerald-200">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-emerald-200">Launch snapshot</p>
+                <h2 className="mt-2 text-lg font-semibold text-white sm:text-xl">Auction flow, simplified.</h2>
+              </div>
+              <span className="rounded-full border border-emerald-300/20 bg-emerald-400/15 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-emerald-200">
                 Live
               </span>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              {proofPoints.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-black/55 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
-                  <p className="mt-2 text-sm font-semibold text-emerald-200">{item.value}</p>
+            <div className="mt-5 grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
+              <div className="rounded-3xl border border-white/10 bg-black/50 p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Top lot</p>
+                    <h3 className="mt-2 text-xl font-semibold text-white">NeuroLink Mk-IV</h3>
+                    <p className="mt-1 text-sm text-slate-400">Neural implant</p>
+                  </div>
+                  <div className="rounded-2xl border border-emerald-300/15 bg-emerald-400/10 px-3 py-2 text-right">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-emerald-200">Current bid</p>
+                    <p className="mt-1 text-lg font-semibold text-white">$18.4k</p>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-black/45 p-4">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">Core surfaces</p>
-                <p className="mt-2 text-sm text-slate-200">Marketplace, live floor, profile, finished reports, seller studio, admin panel.</p>
+                <div className="mt-5 flex items-end gap-2">
+                  {[58, 82, 44, 92, 66, 74].map((height, index) => (
+                    <span
+                      key={height}
+                      className={`w-full rounded-t-full ${index % 2 === 0 ? 'bg-emerald-300/70' : 'bg-cyan-300/70'}`}
+                      style={{ height: `${height}px` }}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-slate-300">
+                    10s closeout
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-slate-300">
+                    OCC guarded
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-slate-300">
+                    Socket live
+                  </span>
+                </div>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-black/45 p-4">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">Built for</p>
-                <p className="mt-2 text-sm text-slate-200">Buyers, sellers, operators, and demo flows that need to feel credible.</p>
+
+              <div className="grid gap-3">
+                {snapshotStats.map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-white/10 bg-black/40 p-4">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
+                    <p className="mt-2 text-xl font-semibold text-white">{item.value}</p>
+                  </div>
+                ))}
               </div>
-            </div>
-
-            <div className="onyx-divider mt-5" />
-
-            <div className="mt-5 space-y-3">
-              <MiniFlow label="Live floor" copy="Active lots move instantly when bids land." />
-              <MiniFlow label="Profile" copy="Placed bids, wins, and seller activity all stay visible." />
-              <MiniFlow label="Reports" copy="Finished auctions open into clean post-auction detail." />
             </div>
           </motion.div>
         </motion.div>
 
-        <div className="mt-8 grid gap-3 rounded-3xl border border-white/10 bg-black/45 p-4 sm:grid-cols-2 lg:grid-cols-4">
-          {brandMarks.map((brand) => (
-            <div key={brand} className="flex items-center justify-center rounded-2xl border border-white/10 bg-black/35 px-3 py-4 text-xs uppercase tracking-[0.2em] text-slate-400">
-              {brand}
+        <div className="mt-8 flex flex-wrap justify-center gap-2 rounded-3xl border border-white/10 bg-black/45 p-4">
+          {snapshotLabels.map((label) => (
+            <div
+              key={label}
+              className="rounded-full border border-white/10 bg-black/35 px-4 py-2 text-xs uppercase tracking-[0.18em] text-slate-300"
+            >
+              {label}
             </div>
           ))}
         </div>
@@ -262,18 +285,6 @@ export function HomePage () {
           </div>
         </motion.div>
       </section>
-    </div>
-  )
-}
-
-function MiniFlow ({ label, copy }) {
-  return (
-    <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4">
-      <span className="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.9)]" />
-      <div>
-        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p>
-        <p className="mt-1 text-sm text-slate-200">{copy}</p>
-      </div>
     </div>
   )
 }
