@@ -34,9 +34,9 @@ const pillars = [
 ]
 
 const steps = [
-  { step: '01', title: 'List', copy: 'Publish a lot with price, image, and duration.' },
-  { step: '02', title: 'Compete', copy: 'Watch bids move live across the floor.' },
-  { step: '03', title: 'Settle', copy: 'See the outcome in reports, profile, and admin views.' }
+  { step: '1.', title: 'List', copy: 'Publish a lot with price, image, and duration.' },
+  { step: '2.', title: 'Compete', copy: 'Watch bids move live across the floor.' },
+  { step: '3.', title: 'Settle', copy: 'See the outcome in reports, profile, and admin views.' }
 ]
 
 const reviews = [
@@ -71,7 +71,7 @@ export function HomePage () {
             transition={{ delay: 0.14 }}
             className="mx-auto max-w-3xl text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl"
           >
-            Live auctions that feel sharp, modern, and easy to trust.
+            ONYX
           </motion.h1>
 
           <motion.p
@@ -175,15 +175,26 @@ export function HomePage () {
           </motion.div>
         </motion.div>
 
-        <div className="mt-8 flex flex-wrap justify-center gap-2 rounded-3xl border border-white/10 bg-black/45 p-4">
-          {snapshotLabels.map((label) => (
-            <div
-              key={label}
-              className="rounded-full border border-white/10 bg-black/35 px-4 py-2 text-xs uppercase tracking-[0.18em] text-slate-300"
-            >
-              {label}
-            </div>
-          ))}
+        <div className="mt-8 rounded-[2rem] border border-white/10 bg-black/45 p-3 shadow-[0_0_40px_rgba(16,185,129,0.08)] sm:p-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {snapshotLabels.map((label, index) => (
+              <div
+                key={label}
+                className={`flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 transition-colors duration-200 hover:border-emerald-300/30 hover:bg-black/45 ${
+                  index === 0 ? 'sm:col-span-2 lg:col-span-1' : ''
+                }`}
+              >
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-gradient-to-br from-emerald-300 via-teal-300 to-cyan-300 shadow-[0_0_16px_rgba(45,212,191,0.75)]" />
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Onyx signal</p>
+                  <p className="truncate text-sm font-medium text-slate-100">{label}</p>
+                </div>
+                <span className="ml-auto text-[10px] uppercase tracking-[0.18em] text-emerald-200/70">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
