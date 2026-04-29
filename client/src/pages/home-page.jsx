@@ -49,7 +49,14 @@ const reviews = [
 export function HomePage () {
   return (
     <div className="onyx-landing min-h-screen pb-16">
-      <section className="mx-auto w-full max-w-6xl px-4 py-14">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="home-blur-orb home-blur-orb-a" />
+        <div className="home-blur-orb home-blur-orb-b" />
+        <div className="home-blur-orb home-blur-orb-c" />
+        <div className="home-fog-sheen" />
+      </div>
+
+      <section className="relative mx-auto w-full max-w-6xl px-4 py-14">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -114,7 +121,7 @@ export function HomePage () {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
-            className="onyx-panel overflow-hidden rounded-3xl p-5 text-left sm:p-6"
+            className="onyx-panel overflow-hidden rounded-3xl p-5 text-left shadow-[0_0_60px_rgba(20,184,166,0.14)] sm:p-6"
           >
             <div className="flex items-center justify-between gap-4">
               <div>
@@ -175,12 +182,12 @@ export function HomePage () {
           </motion.div>
         </motion.div>
 
-        <div className="mt-8 rounded-[2rem] border border-white/10 bg-black/45 p-3 shadow-[0_0_40px_rgba(16,185,129,0.08)] sm:p-4">
+        <div className="mt-8 rounded-[2rem] border border-white/10 bg-black/35 p-3 backdrop-blur-2xl shadow-[0_0_40px_rgba(16,185,129,0.08)] sm:p-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {snapshotLabels.map((label, index) => (
               <div
                 key={label}
-                className={`flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 transition-colors duration-200 hover:border-emerald-300/30 hover:bg-black/45 ${
+              className={`flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-2xl transition-colors duration-200 hover:border-emerald-300/30 hover:bg-white/10 ${
                   index === 0 ? 'sm:col-span-2 lg:col-span-1' : ''
                 }`}
               >

@@ -87,13 +87,13 @@ export function SiteNav () {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-cyan-400/20 bg-[#05040c]/80 backdrop-blur-xl">
+      <header className="onyx-nav-panel sticky top-0 z-30 border-b border-cyan-400/20">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="relative z-10 flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.95)]" />
           <span className="font-display text-sm font-semibold tracking-wide text-white">ONYX</span>
         </Link>
-        <nav className="flex flex-wrap items-center gap-2">
+        <nav className="relative z-10 flex flex-wrap items-center gap-2">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -122,7 +122,7 @@ export function SiteNav () {
             </NavLink>
           ) : null}
           {user ? (
-            <div className="ml-2 flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-2 py-1">
+            <div className="ml-2 flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-2 py-1 backdrop-blur-xl">
               <Link to="/profile" className="flex items-center gap-2">
                 {user.profile?.avatarUrl ? (
                   <img src={user.profile.avatarUrl} alt={user.fullName} className="h-7 w-7 rounded-full object-cover" />
