@@ -53,21 +53,46 @@ export function FinishedAuctionsPage () {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.015 }}
-              className="glass overflow-hidden rounded-2xl"
+              className="archive-card rounded-[1.75rem]"
             >
-              <AuctionImage src={auction.imageUrl} alt={auction.title} className="h-44 w-full object-cover" />
-              <div className="p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="line-clamp-1 text-sm font-semibold text-white">{auction.title}</p>
-                  <span className="rounded-full bg-cyan-500/20 px-2 py-1 text-[10px] uppercase text-cyan-100">
+              <div className="auction-card-media relative h-52 w-full">
+                <AuctionImage src={auction.imageUrl} alt={auction.title} className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#05070c] via-[#05070c]/30 to-transparent" />
+                <div className="absolute left-3 top-3">
+                  <span className="auction-pill rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-cyan-100">
                     {auction.status}
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-slate-400">Ended {new Date(auction.endTime).toLocaleString()}</p>
-                <p className="mt-2 text-sm text-cyan-200">{formatCurrency(auction.currentBid, auction.currency)}</p>
+                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
+                  <div className="rounded-2xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-xl">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Ended</p>
+                    <p className="mt-1 text-sm font-semibold text-white">{new Date(auction.endTime).toLocaleString()}</p>
+                  </div>
+                  <div className="rounded-2xl border border-emerald-300/15 bg-emerald-400/10 px-3 py-2 text-right">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-emerald-200">Final bid</p>
+                    <p className="mt-1 text-sm font-semibold text-white">{formatCurrency(auction.currentBid, auction.currency)}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5">
+                <p className="line-clamp-1 text-base font-semibold text-white">{auction.title}</p>
+                <p className="mt-2 line-clamp-2 text-sm text-slate-300">
+                  Closed auction archive entry with report-ready settlement detail.
+                </p>
+                <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                  <div className="auction-stat rounded-2xl p-3">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Status</p>
+                    <p className="mt-1 font-semibold text-cyan-200">{auction.status}</p>
+                  </div>
+                  <div className="auction-stat rounded-2xl p-3">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Currency</p>
+                    <p className="mt-1 font-semibold text-white">{auction.currency}</p>
+                  </div>
+                </div>
                 <Link
                   to={`/auctions/${auction._id}`}
-                  className="mt-3 inline-flex rounded-lg border border-cyan-300/30 px-3 py-1.5 text-xs uppercase tracking-[0.15em] text-cyan-200 hover:bg-cyan-400/10"
+                  className="auction-link mt-4 inline-flex rounded-full border border-cyan-300/30 px-4 py-2 text-xs uppercase tracking-[0.18em] text-cyan-100 hover:bg-cyan-400/10"
                 >
                   View report
                 </Link>

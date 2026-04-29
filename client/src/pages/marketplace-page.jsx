@@ -151,43 +151,56 @@ export function MarketplacePage () {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.02 }}
-              className="glass overflow-hidden rounded-2xl"
+              className="auction-card rounded-[1.75rem]"
             >
-              <div className="relative h-44 w-full">
+              <div className="auction-card-media relative h-52 w-full">
                 <AuctionImage src={auction.imageUrl} alt={auction.title} className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
-                  <span className="rounded-full bg-cyan-500/20 px-2 py-1 text-[10px] uppercase tracking-wider text-cyan-100">
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#05070c] via-[#05070c]/65 to-transparent" />
+                <div className="absolute left-3 top-3 flex items-center gap-2">
+                  <span className="auction-pill rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-cyan-100">
                     {auction.category || 'Cyber Gear'}
                   </span>
-                  <span className="rounded-full bg-emerald-500/20 px-2 py-1 text-[10px] uppercase tracking-wider text-emerald-100">
-                    Live
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
+                  <div className="rounded-2xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-xl">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Ends in</p>
+                    <p className="mt-1 text-sm font-semibold text-white">{formatTimeLeft(auction.endTime, nowMs)}</p>
+                  </div>
+                  <span className="auction-pill rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-emerald-100">
+                    Live floor
                   </span>
                 </div>
               </div>
-              <div className="p-4">
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="line-clamp-1 text-sm font-semibold text-white">{auction.title}</p>
-                  <span className="text-[11px] text-slate-400">{auction.bidCount} bids</span>
+
+              <div className="p-4 sm:p-5">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="line-clamp-1 text-base font-semibold text-white">{auction.title}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">{auction.bidCount} bids</p>
+                  </div>
+                  <div className="rounded-2xl border border-emerald-300/15 bg-emerald-400/10 px-3 py-2 text-right">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-emerald-200">Current bid</p>
+                    <p className="mt-1 text-sm font-semibold text-white">{formatCurrency(auction.currentBid, auction.currency)}</p>
+                  </div>
                 </div>
                 <p className="line-clamp-2 text-sm text-slate-300">{auction.description}</p>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-lg border border-white/10 bg-black/20 p-2">
-                    <p className="text-slate-400">Current</p>
-                    <p className="font-semibold text-cyan-200">{formatCurrency(auction.currentBid, auction.currency)}</p>
+                  <div className="auction-stat rounded-2xl p-3">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Floor</p>
+                    <p className="mt-1 font-semibold text-cyan-200">{formatCurrency(auction.basePrice, auction.currency)}</p>
                   </div>
-                  <div className="rounded-lg border border-white/10 bg-black/20 p-2">
-                    <p className="text-slate-400">Ends In</p>
-                    <p className="font-semibold text-white">{formatTimeLeft(auction.endTime, nowMs)}</p>
+                  <div className="auction-stat rounded-2xl p-3">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Momentum</p>
+                    <p className="mt-1 font-semibold text-white">{auction.minBidIncrement} step</p>
                   </div>
                 </div>
                 <Link
                   to={`/auctions/${auction._id}`}
-                  className="mt-4 inline-flex rounded-lg border border-cyan-300/30 px-3 py-1.5 text-xs uppercase tracking-[0.15em] text-cyan-200 transition hover:bg-cyan-400/10"
+                  className="auction-link mt-4 inline-flex rounded-full border border-cyan-300/30 px-4 py-2 text-xs uppercase tracking-[0.18em] text-cyan-100 transition hover:bg-cyan-400/10"
                 >
                   Open Intel View
                 </Link>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-4 flex gap-2">
                   <input
                     type="number"
                     min={auction.currentBid + auction.minBidIncrement}
@@ -195,12 +208,12 @@ export function MarketplacePage () {
                     value={bidDraft[auction._id] ?? ''}
                     onChange={(e) => setBidDraft((prev) => ({ ...prev, [auction._id]: e.target.value }))}
                     placeholder={`Min ${auction.currentBid + auction.minBidIncrement}`}
-                    className="w-full rounded-lg border border-white/20 bg-black/25 px-2 py-1.5 text-xs text-white outline-none"
+                    className="w-full rounded-full border border-white/20 bg-black/25 px-3 py-2 text-xs text-white outline-none backdrop-blur-xl"
                   />
                   <button
                     onClick={() => placeBid(auction)}
                     disabled={placingFor === String(auction._id) || !user || user.role === 'seller'}
-                    className="rounded-lg bg-emerald-400 px-3 py-1.5 text-xs font-semibold text-slate-950 disabled:opacity-50"
+                    className="rounded-full bg-emerald-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-[0_12px_28px_rgba(16,185,129,0.22)] disabled:opacity-50"
                   >
                     {placingFor === String(auction._id) ? 'Bidding...' : 'Bid'}
                   </button>
