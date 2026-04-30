@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+set -e
 
 mongosh --host mongo:27017 <<'EOF'
 const config = {
